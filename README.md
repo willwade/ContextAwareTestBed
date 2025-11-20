@@ -1,5 +1,12 @@
 # **Context-Aware AAC Testbed: LLM Experimentation**
 
+## "Explain it to me like I'm a .net developer section"
+
+The Client: "Dave" (MND patient). High latency input (speaking is hard), critical SLA (needs air/meds immediately).
+The Legacy System: Standard LLMs (ChatGPT). They are stateless, overly polite, and prone to hallucinations because they lack business logic.
+
+Prompt Engineering is useless without a rigid Singleton State. (What a loser..)
+
 **Objective:** To determine if injecting specific contextual data (User Profile, Time, Location) into a Large Language Model (LLM) improves the accuracy and utility of phrase predictions for a user with Motor Neurone Disease (MND).
 
 ## **The Hypothesis**
@@ -32,6 +39,7 @@ Standard predictive text and generic LLMs fail AAC users because they prioritize
 
 The core of our "Smart" system is the **Static Profile** (`Dave_context.json`). This JSON structure acts as the "Long Term Memory" for the LLM, providing it with the medical and social nuances required to interpret telegraphic speech.
 
+```json
 {  
   "identity": {  
     "name": "Dave",  
@@ -100,12 +108,15 @@ The core of our "Smart" system is the **Static Profile** (`Dave_context.json`). 
     "medical": "Pressure sore check on heel (healing) and arm (reaction to adhesive)."  
   }  
 }
+```
 
 ## **Experiment 1: The Baseline (Context vs. Noise)**
 
 **Script:** `uv run run_strict_aac.py`
 
 **Logic:** This script iterates through specific interaction scenarios. It generates predictions based on 5 distinct Hypotheses (H) ranging from "Blind Guessing" to "Full Context". A "Judge" LLM then scores the prediction against the Ground Truth intent.
+
+So in detail.. we take a full social graph (dave_context.json) and a set of scenarios (transcript_data_2.json) and we run 5 tests per scenario. Each test has a different level of context provided to the LLM. The LLM then predicts the next phrase. A second LLM (the judge) scores the prediction against the ground truth on a scale of 1-10.
 
 | Hypothesis | Inputs Provided to LLM |
 | ----- | ----- |
@@ -122,11 +133,13 @@ The core of our "Smart" system is the **Static Profile** (`Dave_context.json`). 
 
 *Figure 1: While Speech+Profile (Grey) performs well generally, Full Context (Green) closes the gap in safety-critical or socially complex scenarios (ID 102, 105).*
 
-## **Experiment 2: The Ablation Test (The Value of Profile)**
+## **Experiment 2: The Ablation (remove the profile)  Test (The Value of Profile)**
 
 **Script:** `uv run run_speech_ablation.py`
 
-**Logic:** We stripped away the `Dave_context.json` to see how a "Raw" LLM (like ChatGPT/Siri) handles vague cues compared to our "Smart" system.
+**Logic:** We stripped away the `Dave_context.json` to see how a "Raw" LLM (like ChatGPT/Siri) handles vague cues compared to our "Smart" system. So we used transcript_vague.json instead of transcript_data_2.json.
+
+We run 2 tests. One is WITH the profile and one is WITHOUT. Note although the transcript is vague its still stating scenarios.. this in itself may be context that we dont have at all
 
 **Results:**
 
